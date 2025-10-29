@@ -1,12 +1,2 @@
 node_modules
 .env
-MAIL_POST=smtp.gmail.com
-MAIL_USER=bhavyaagrawal172@gmail.com
-MAIL_PASSWORD=dqli cido ggbm sxoz
-MAIL_RECEIVER=bhavyaagrawal172@gmail.com
-
-PORT = 5175;
-
-EMAIL_USER=bhavyaagrawal80@gmail.com
-EMAIL_PASS=aghz gmte amjj kgms
-RECIPIENT_EMAIL=bhavyaagrawal80@gmail.com
