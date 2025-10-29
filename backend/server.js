@@ -56,5 +56,15 @@ app.post("/contact", async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 5175;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+const PORT = process.env.PORT || 5000;
+
+console.log("👉 Starting server setup...");
+
+try {
+ app.listen(PORT, "127.0.0.1", () => console.log(`Server running on port ${PORT}`));
+
+
+} catch (err) {
+  console.error("❌ Server failed to start:", err);
+}
+

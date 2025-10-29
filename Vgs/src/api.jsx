@@ -1,7 +1,8 @@
 // src/api.js
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:5175"; // change later to your deployed backend URL
+const API_BASE_URL = "http://localhost:5000";
+ // change later to your deployed backend URL
 
 const api = {
   contact: async (data) => {
