@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Scale, Menu, X, ChevronDown, GraduationCap, Briefcase } from "lucide-react";
+import logo from "../assets/logo.jpg";
 
 const Navbar = ({ activeSection = 'home', disabled = false }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -60,17 +61,13 @@ const Navbar = ({ activeSection = 'home', disabled = false }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 lg:h-20">
           {/* Logo */}
-          <div className={`flex items-center space-x-3 ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
-            <div className="bg-gradient-to-br from-amber-400 to-amber-600 p-2 rounded-lg">
-              <Scale className="h-6 w-6 text-slate-900" />
-            </div>
-            <div>
-              <h1 className="text-xl lg:text-3xl font-bold text-white">
-                VRG Legal
-              </h1>
-              <p className="text-xl text-amber-400 font-medium">LLP</p>
-            </div>
-          </div>
+          <div className={`flex items-center space-x-4 ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+  <img src={logo} alt="VRG Legal Logo" className="h-16 w-auto object-contain" />
+  <h1 className="text-3xl font-bold text-white">
+    VRG Legal <span className="text-amber-400">LLP</span>
+  </h1>
+</div>
+
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-8">
@@ -81,48 +78,65 @@ const Navbar = ({ activeSection = 'home', disabled = false }) => {
             >
               Home
             </Link>
-            <a
-              href="#about"
-              onClick={handleLinkClick}
-              className={getNavLinkClass(activeSection === 'about')}
-            >
-              About
-            </a>
+             <a
+  href="#about"
+  onClick={(e) => {
+    e.preventDefault();
+    document.getElementById("about")?.scrollIntoView({ behavior: "smooth" });
+  }}
+  className={getNavLinkClass(activeSection === 'about')}
+>
+About Us
+</a>
             
-            <Link
-              to="/Service"
-              onClick={handleLinkClick}
-              className={getNavLinkClass(activeSection === 'practice')}
-            >
-              Services
-            </Link>
             <a
-              href="#attorneys"
-              onClick={handleLinkClick}
-              className={getNavLinkClass(activeSection === 'attorneys')}
-            >
-              Team
-            </a>
+  href="#services"
+  onClick={(e) => {
+    e.preventDefault();
+    document.getElementById("services")?.scrollIntoView({ behavior: "smooth" });
+  }}
+  className={getNavLinkClass(activeSection === 'practice')}
+>
+  Services
+</a>
             <a
-              href="#practice"
-              onClick={handleLinkClick}
-              className={getNavLinkClass(activeSection === 'practice')}
-            >
-              Testimonials
-            </a>
+  href="#team"
+  onClick={(e) => {
+    e.preventDefault();
+    document.getElementById("team")?.scrollIntoView({ behavior: "smooth" });
+  }}
+  className={getNavLinkClass(activeSection === 'team')}
+>
+  Team
+</a>
+  <a
+  href="#testimonials"
+  onClick={(e) => {
+    e.preventDefault();
+    document.getElementById("testimonials")?.scrollIntoView({ behavior: "smooth" });
+  }}
+  className={getNavLinkClass(activeSection === 'testimonials')}
+>
+  Testimonials
+</a>
             <a
-              href="#contact"
-              onClick={handleLinkClick}
-              className={getNavLinkClass(activeSection === 'contact')}
-            >
-              Schedule Consultation
-            </a>
+  href="#contact"
+  onClick={(e) => {
+    e.preventDefault();
+    document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+  }}
+  className={getNavLinkClass(activeSection === 'contact')}
+>
+  Contact Us
+</a>
             {/* Join Us Dropdown */}
             <div className="relative">
               <button
                 className={getJoinUsButtonClass()}
-                onMouseEnter={() => handleClick(() => setIsJoinUsDropdownOpen(true))}
-                onMouseLeave={() => handleClick(() => setIsJoinUsDropdownOpen(false))}
+                onClick={() => handleClick(() =>
+  setIsJoinUsDropdownOpen(!isJoinUsDropdownOpen)
+)}
+
                 disabled={disabled}
               >
                 <span>Join Us</span>
@@ -188,13 +202,17 @@ const Navbar = ({ activeSection = 'home', disabled = false }) => {
             >
               About
             </a>
-            <Link
-              to="/Service"
-              className={getMobileLinkClass(activeSection === 'practice')}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Services
-            </Link>
+            <a
+  href="#services"
+  onClick={(e) => {
+    e.preventDefault();
+    document.getElementById("services")?.scrollIntoView({ behavior: "smooth" });
+  }}
+  className={getNavLinkClass(activeSection === 'practice')}
+>
+  Services
+</a>
+
             <a
               href="#attorneys"
               className={getMobileLinkClass(activeSection === 'attorneys')}

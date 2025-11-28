@@ -15,6 +15,9 @@ import { AboutUs } from "./AboutUs";
 import Team from "./Team";
 import Service from "./Service";
 import ContactForm from './ContactForm';
+import Testimonials from "./testimonials";
+import logo from "../assets/logo.jpg";
+
 
 const Home = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -176,6 +179,8 @@ const Home = () => {
         {/* Team Section */}
         <Team />
 
+         <Testimonials/> 
+
         {/* Contact Section */}
         <section id="contact" className="py-20 bg-slate-900">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -246,14 +251,15 @@ const Home = () => {
             <div className="grid md:grid-cols-4 gap-8 mb-8">
               <div>
                 <div className="flex items-center space-x-3 mb-4">
-                  <div className="bg-gradient-to-br from-amber-400 to-amber-600 p-2 rounded-lg">
-                    <Scale className="h-6 w-6 text-slate-900" />
-                  </div>
+                  
+
+                    <img src={logo} alt="VRG Legal Logo" className="h-16 w-auto object-contain" />
+                    
+                  
                   <div>
-                    <h3 className="text-xl font-bold text-white">VRG Legal</h3>
-                    <p className="text-xs text-amber-400 font-medium">
-                      LLP
-                    </p>
+                     <h1 className="text-2xl font-bold text-white">
+    VRG Legal <span className="text-amber-400">LLP</span>
+  </h1>
                   </div>
                 </div>
                 <p className="text-slate-400 text-sm">
@@ -275,7 +281,7 @@ const Home = () => {
                   </li>
                   <li>
                     <a
-                      href="#practice"
+                      href="#services"
                       className="text-slate-400 hover:text-amber-400 transition-colors text-sm"
                     >
                       Practice Areas

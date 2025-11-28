@@ -71,8 +71,8 @@ const servicesRow2 = [
     title: "Civil Law",
     desc: "Know More",
     link: "/intellectual",
-    titleColor: "text-black",
-    buttonColor: "bg-black",
+    titleColor: "text-white",
+    buttonColor: "bg-[#dee9fd] text-white",
     popupContent: "Comprehensive intellectual property protection including patents, trademarks, copyrights, and trade secrets."
   },
   {
@@ -155,7 +155,7 @@ export const Desktop = () => {
   };
 
   return (
-    <>
+    <section id="services">
       <h1 className="font-bold font-sans text-[40px] text-center mb-3">
         Our Services
       </h1>
@@ -170,8 +170,8 @@ export const Desktop = () => {
                 onClick={() => setActive(service.id)}
                 className={`
                   relative flex flex-col justify-end items-center rounded-[40px] border border-black bg-cover bg-center cursor-pointer transition-all duration-500 ease-in-out
-                  h-[400px] pb-1
-                  ${active === service.id ? "flex-[1.5]" : "flex-1"}
+                  h-[350px] pb-1
+                  ${active === service.id ? "flex-[1.4]" : "flex-1"}
                 `}
                 style={{ backgroundImage: `url(${service.img})` }}
               >
@@ -191,7 +191,7 @@ export const Desktop = () => {
                   <div
                     onClick={(e) => handleKnowMoreClick(e, service)}
                     className={`underline cursor-pointer transition-colors text-sm font-medium drop-shadow-lg ${
-                      service.id === "dispute" ? "text-white hover:text-gray-200" : "text-black hover:text-gray-600"
+                      service.id === "dispute"  ? "text-white hover:text-gray-200" : "text-black hover:text-gray-600"
                     }`}
                   >
                     {service.desc}
@@ -211,8 +211,8 @@ export const Desktop = () => {
                 onClick={() => setActive(service.id)}
                 className={`
                   relative flex flex-col justify-end items-center rounded-[40px] border border-black bg-cover bg-center cursor-pointer transition-all duration-500 ease-in-out
-                  h-[400px] pb-1
-                  ${active === service.id ? "flex-[1.5]" : "flex-1"}
+                  h-[350px] pb-1
+                  ${active === service.id ? "flex-[1.3]" : "flex-1"}
                 `}
                 style={{ backgroundImage: `url(${service.img})` }}
               >
@@ -232,7 +232,7 @@ export const Desktop = () => {
                   <div
                     onClick={(e) => handleKnowMoreClick(e, service)}
                     className={`underline cursor-pointer transition-colors text-sm font-medium drop-shadow-lg ${
-                      service.id === "Family and Guardianship" ? "text-white hover:text-gray-200" : "text-black hover:text-gray-600"
+                      service.id === "Family and Guardianship"  || service.id === "Civil Law" || service.id === "Commercial Law" || service.id === "Property Law"? "text-white hover:text-gray-200" : "text-black hover:text-gray-600"
                     }`}
                   >
                     {service.desc}
@@ -252,7 +252,7 @@ export const Desktop = () => {
         content={popup.service?.popupContent}
         titleColor={popup.service?.titleColor}
       />
-    </>
+    </section>
   );
 };
 

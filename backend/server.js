@@ -11,11 +11,12 @@ const app = express();
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
 process.on("uncaughtException", (err) => {
   console.error("🔥 UNCAUGHT ERROR:", err);
 });
 
-// === Multer setup for file uploads ===
+// === Multer setup for TWO FILES: resume + coverLetter ===
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads/");
@@ -25,129 +26,157 @@ const storage = multer.diskStorage({
     cb(null, uniqueName);
   },
 });
+
 const upload = multer({ storage });
 
 // === Route to handle form submission ===
-app.post("/api/join-us", upload.single("resume"), async (req, res) => {
-  try {
-    const formData = req.body;
-    const file = req.file;
+app.post(
+  "/api/join-us",
+  upload.fields([
+  { name: "resume", maxCount: 1 },
+  { name: "cv", maxCount: 1 }
+]),
+  async (req, res) => {
+    try {
+      const formData = req.body;
+      const files = req.files || {};
 
-    console.log("✅ Received form data:", formData);
+      const resumeFile = files.resume ? files.resume[0] : null;
+      const cvFile = files.cv ? files.cv[0] : null;
 
-    // === Setup transporter ===
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
 
-    // === Build email content ===
-    const subject = `New ${formData.joinType?.toUpperCase()} Application - ${formData.fullName}`;
-    const textBody = `
+      console.log("✅ Received form data:", formData);
+
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS
+        }
+      });
+
+      const subject = `New ${formData.joinType?.toUpperCase()} Application - ${formData.fullName}`;
+
+      const textBody = `
 A new ${formData.joinType} application has been submitted.
 
-👤 Name: ${formData.fullName}
-📧 Email: ${formData.email}
-👪 Relation: ${formData.relationName}
-🎂 Age: ${formData.age}
-📞 WhatsApp: ${formData.whatsappNumber}
-📞 Alternate: ${formData.alternateNumber || "N/A"}
-🏠 Permanent Address: ${formData.permanentAddress}
-🏠 Present Address: ${formData.presentAddress}
+=====================================
+👤 PERSONAL DETAILS
+=====================================
+Name: ${formData.fullName}
+Email: ${formData.email}
+Phone / WhatsApp: ${formData.whatsappNumber}
+Alternate Number: ${formData.alternateNumber || "N/A"}
 
-🎓 University/College: ${formData.university || "N/A"}
-⚖️ Bar Registration No: ${formData.barRegistrationNumber || "N/A"}
+Permanent Address: ${formData.permanentAddress}
+Present Address: ${formData.presentAddress}
 
-💬 Why should we choose you:
+=====================================
+🎓 EDUCATION DETAILS
+=====================================
+
+${formData.joinType === "intern" ? `
+University/College: ${formData.university}
+Year: ${formData.year}
+Semester: ${formData.semester}
+` : `
+Bar Registration Number: ${formData.barRegistrationNumber}
+University: ${formData.advocateUniversity}
+Additional Qualification: ${formData.additionalQualification || "N/A"}
+`}
+
+=====================================
+💬 RESPONSES
+=====================================
+
+Why should we choose you:
 ${formData.whyChooseYou}
 
-💡 How did you know about chamber:
+How did you get to know about us:
 ${formData.howDidYouKnow}
 
-✨ Why do you wish to join:
+Why do you wish to join us:
 ${formData.whyJoinChamber}
-    `;
 
-    // === Send email ===
-    const mailOptions = {
-      from: `"VRG Legal Join Us" <${process.env.EMAIL_USER}>`,
-      to: process.env.TO_EMAIL,
-      subject,
-      text: textBody,
-      attachments: file
-        ? [
-            {
-              filename: file.originalname,
-              path: file.path,
-            },
-          ]
-        : [],
-    };
+=====================================
+📄 ATTACHMENTS
+=====================================
 
-    await transporter.sendMail(mailOptions);
-    console.log("📨 Email sent successfully!");
+Resume: ${resumeFile ? resumeFile.originalname : "Not uploaded"}
+Cover Letter: ${coverLetterFile ? coverLetterFile.originalname : "Not uploaded"}
+`;
 
-    // Delete uploaded file after sending
-    if (file) fs.unlinkSync(file.path);
+      const attachments = [];
+      if (resumeFile) {
+        attachments.push({
+          filename: resumeFile.originalname,
+          path: resumeFile.path
+        });
+      }
+      if (coverLetterFile) {
+        attachments.push({
+          filename: coverLetterFile.originalname,
+          path: coverLetterFile.path
+        });
+      }
 
-    res.json({ success: true, message: "Application received successfully!" });
-  } catch (error) {
-    console.error("❌ Error:", error);
-    res.status(500).json({ success: false, message: "Failed to send email" });
+      await transporter.sendMail({
+        from: `"VRG Legal Join Us" <${process.env.EMAIL_USER}>`,
+        to: process.env.TO_EMAIL,
+        subject,
+        text: textBody,
+        attachments
+      });
+
+      // delete files
+      if (resumeFile) fs.unlinkSync(resumeFile.path);
+      if (coverLetterFile) fs.unlinkSync(coverLetterFile.path);
+
+      res.json({ success: true, message: "Application received successfully!" });
+    } catch (err) {
+      console.error("❌ Error:", err);
+      res.status(500).json({ success: false, message: "Failed to send email" });
+    }
   }
-});
+);
 
-// === Contact route (no file upload) ===
 app.post("/api/contact", async (req, res) => {
   try {
-    const { firstName, lastName, email, phone, message } = req.body || {};
+    const { firstName, lastName, email, phone, message } = req.body;
 
-    // Basic validation
-    if (!firstName || !lastName || !email || !phone || !message) {
-      return res.status(400).json({ success: false, message: "All fields are required." });
-    }
+    console.log("📩 Contact form data:", req.body);
 
-    // Setup transporter (reuses your existing transporter config)
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
+        pass: process.env.EMAIL_PASS
+      }
     });
 
-    const subject = `New Contact Request from ${firstName} ${lastName}`;
-    const textBody = `
-New contact request:
-
+    await transporter.sendMail({
+      from: `"Website Contact" <${process.env.EMAIL_USER}>`,
+      to: process.env.TO_EMAIL,
+      subject: `New Contact Message from ${firstName} ${lastName}`,
+      text: `
 Name: ${firstName} ${lastName}
 Email: ${email}
 Phone: ${phone}
 
 Message:
 ${message}
-    `;
-
-    const mailOptions = {
-      from: `"VRG Legal Contact" <${process.env.EMAIL_USER}>`,
-      to: process.env.TO_EMAIL,
-      subject,
-      text: textBody,
-    };
-
-    await transporter.sendMail(mailOptions);
-    console.log("📨 Contact email sent");
+`
+    });
 
     res.json({ success: true, message: "Message sent successfully!" });
-  } catch (error) {
-    console.error("❌ Contact route error:", error);
-    res.status(500).json({ success: false, message: "Failed to send message." });
+  } catch (err) {
+    console.error("❌ Contact Error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to send message"
+    });
   }
 });
-
 
 // === Start server ===
 const PORT = process.env.PORT || 5000;
