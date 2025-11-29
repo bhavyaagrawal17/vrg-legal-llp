@@ -33,17 +33,16 @@ const upload = multer({ storage });
 app.post(
   "/api/join-us",
   upload.fields([
-  { name: "resume", maxCount: 1 },
-  { name: "cv", maxCount: 1 }
-]),
+    { name: "resume", maxCount: 1 },
+    { name: "coverLetter", maxCount: 1 }
+  ]),
   async (req, res) => {
     try {
       const formData = req.body;
       const files = req.files || {};
 
       const resumeFile = files.resume ? files.resume[0] : null;
-      const cvFile = files.cv ? files.cv[0] : null;
-
+      const coverLetterFile = files.coverLetter ? files.coverLetter[0] : null;
 
       console.log("✅ Received form data:", formData);
 

@@ -1,6 +1,6 @@
 import { Scale } from "lucide-react";
  import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import aboutUs from '../assets/aboutUs.jpeg'
+
 
 export function AboutUs() {
   return (

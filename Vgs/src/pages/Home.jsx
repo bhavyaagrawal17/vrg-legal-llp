@@ -204,7 +204,7 @@ const Home = () => {
                     <Phone className="h-6 w-6 text-amber-400 mr-3" />
                     <h3 className="text-xl font-bold text-white">Phone</h3>
                   </div>
-                  <p className="text-slate-300">+1 (555) 123-4567</p>
+                  <p className="text-slate-300">9899505223</p>
                 </div>
 
                 <div className="bg-slate-800 p-6 rounded-xl">
@@ -313,7 +313,7 @@ const Home = () => {
                   <p className="text-slate-400">
                     Pitampura, Delhi-110034
                   </p>
-                  <p className="text-slate-400">+1 (555) 123-4567</p>
+                  <p className="text-slate-400">9899505223</p>
                   <p className="text-slate-400">
                     vaibhavguptalegal@gmail.com
                   </p>

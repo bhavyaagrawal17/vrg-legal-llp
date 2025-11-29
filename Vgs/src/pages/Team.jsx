@@ -21,8 +21,8 @@ const team = [
     
   },
   {
-    name: 'D. S. Bhangari',
-    title: 'Team Lead - Family Disputes',
+    name: 'D. S. Bangari',
+    title: 'Team Lead - Property Matters',
     img: '#', // Replace with actual image URL
     
   },

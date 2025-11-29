@@ -27,11 +27,37 @@ export default function JoinUs() {
     year: "",
     semester: "",
   });
+useEffect(() => {
+  // Reset fields whenever user switches between Intern / Advocate
+  setFormData({
+    fullName: "",
+    email: "",
+    permanentAddress: "",
+    presentAddress: "",
+    whatsappNumber: "",
+    alternateNumber: "",
+    whyChooseYou: "",
+    howDidYouKnow: "",
+    whyJoinChamber: "",
+    coverLetter: null,
+    resume: null,
+    university: "",
+    advocateUniversity: "",
+    additionalQualification: "",
+    barRegistrationNumber: "",
+    year: "",
+    semester: "",
+  });
+
+  setSubmitStatus(null);
+  setIsSubmitting(false); 
+}, [selectedType]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
 
   useEffect(() => {
+    
     const type = searchParams.get("type");
     if (type === "intern" || type === "advocate") {
       setSelectedType(type);
@@ -158,11 +184,38 @@ export default function JoinUs() {
       setIsSubmitting(false);
     }
   };
+  useEffect(() => {
+  const hasUnsavedData = Object.values(formData).some(v => v);
 
-  const handleBackToOptions = () => {
-    setSelectedType(null);
-    setSubmitStatus(null);
+  const handleBeforeUnload = (e) => {
+    if (hasUnsavedData && !isSubmitting) {
+      e.preventDefault();
+      e.returnValue = "";
+    }
   };
+
+  window.addEventListener("beforeunload", handleBeforeUnload);
+  return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+}, [formData, isSubmitting]);
+
+
+ const handleBackClick = () => {
+  if (isSubmitting) {
+    alert("Form is submitting. Please wait...");
+    return;
+  }
+
+  if (Object.values(formData).some(v => v)) {
+    const confirmSwitch = window.confirm(
+      "If you go back, all filled data will be lost. Continue?"
+    );
+    if (!confirmSwitch) return;
+  }
+
+  setSelectedType(null);
+  setSubmitStatus(null);
+};
+
 
   // ================================
   // FILE UPLOAD UI (COVER LETTER + RESUME)
@@ -244,11 +297,32 @@ export default function JoinUs() {
       </div>
     </div>
   );
+const handleTypeSwitch = (type) => {
+  if (isSubmitting) {
+    alert("Your application is being submitted. Please wait...");
+    return;
+  }
+
+  if (formData.fullName || formData.email || formData.permanentAddress || formData.presentAddress ||
+      formData.whatsappNumber || formData.alternateNumber || formData.whyChooseYou ||
+      formData.howDidYouKnow || formData.whyJoinChamber || formData.coverLetter || formData.resume ||
+      formData.university || formData.advocateUniversity || formData.additionalQualification ||
+      formData.barRegistrationNumber || formData.year || formData.semester) 
+  {
+    const confirmSwitch = window.confirm(
+      "If you switch now, the data you entered in this form will be lost. Continue?"
+    );
+    if (!confirmSwitch) return;
+  }
+
+  setSelectedType(type);
+};
 
   return (
     <div className="min-h-screen bg-white relative overflow-hidden">
       <div className="relative z-50">
-        <Navbar />
+        <Navbar formData={formData}
+         isSubmitting={isSubmitting}/>
       </div>
 
       {/* Background Pattern */}
@@ -298,7 +372,8 @@ export default function JoinUs() {
               <div className="bg-white rounded-2xl shadow-xl p-8">
                 {/* Back button */}
                 <button
-                  onClick={handleBackToOptions}
+                  onClick={handleBackClick}
+
                   className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition mb-6"
                 >
                   <ArrowLeft className="h-5 w-5" />
@@ -632,7 +707,8 @@ export default function JoinUs() {
                 description="Gain real-world legal experience and grow with industry mentors."
                 buttonText="Apply as Intern"
                 variant="intern"
-                onApply={() => setSelectedType("intern")}
+                onApply={() => handleTypeSwitch("intern")}
+
               />
 
               <JoinUsCard
@@ -641,7 +717,8 @@ export default function JoinUs() {
                 description="Collaborate with experienced legal professionals and bring your expertise."
                 buttonText="Apply as Advocate"
                 variant="advocate"
-                onApply={() => setSelectedType("advocate")}
+               onApply={() => handleTypeSwitch("advocate")}
+
               />
             </div>
           )}

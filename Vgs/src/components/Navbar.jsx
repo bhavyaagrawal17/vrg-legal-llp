@@ -1,54 +1,86 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { Scale, Menu, X, ChevronDown, GraduationCap, Briefcase } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  Scale,
+  Menu,
+  X,
+  ChevronDown,
+  GraduationCap,
+  Briefcase,
+} from "lucide-react";
 import logo from "../assets/logo.jpg";
 
-const Navbar = ({ activeSection = 'home', disabled = false }) => {
+const Navbar = ({
+  activeSection = "home",
+  disabled = false,
+  formData = {},
+  isSubmitting = false,
+}) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isJoinUsDropdownOpen, setIsJoinUsDropdownOpen] = useState(false);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  // Prevent all interactions when disabled
-  const handleClick = (callback) => {
-    if (disabled) return;
-    callback();
-  };
+  const isOnJoinUsPage = location.pathname === "/JoinUs";
 
-  const handleLinkClick = (e) => {
-    if (disabled) {
+  // Check unsaved form data
+  const hasUnsavedData = Object.values(formData).some((v) => v);
+
+  /** 🔥 BLOCK NAVIGATION IF FORM HAS DATA OR SUBMITTING */
+  const handleProtectedNavigation = (e) => {
+    if (!isOnJoinUsPage) return;
+
+    if (isSubmitting) {
       e.preventDefault();
+      alert("Your application is being submitted. Please wait...");
       return;
+    }
+
+    if (hasUnsavedData) {
+      const confirmLeave = window.confirm(
+        "If you leave this page, all entered data will be lost. Continue?"
+      );
+      if (!confirmLeave) {
+        e.preventDefault();
+      }
     }
   };
 
-  // Dynamic classes based on disabled state
-  const getNavLinkClass = (isActive) => {
-    const baseClass = "relative font-medium transition-colors";
-    const activeClass = isActive ? "text-amber-400 border-b-2 border-amber-400 pb-1" : "text-white hover:text-amber-400";
-    const disabledClass = disabled ? "opacity-50 cursor-not-allowed pointer-events-none" : "";
-    return `${baseClass} ${activeClass} ${disabledClass}`;
+  /** ⭐ UNIVERSAL SCROLL FUNCTION (WORKS ON JOINUS + HOME) */
+  const scrollToSection = (e, sectionId) => {
+    // Apply data loss protection only on JoinUs
+    if (isOnJoinUsPage) {
+      handleProtectedNavigation(e);
+      if (e.defaultPrevented) return;
+    }
+
+    if (!isOnJoinUsPage) {
+      // Already on home → just scroll
+      const section = document.getElementById(sectionId);
+      if (section) {
+        section.scrollIntoView({ behavior: "smooth" });
+      }
+      return;
+    }
+
+    // If on JoinUs → first navigate Home, then scroll
+    navigate("/Home");
+
+    setTimeout(() => {
+      const section = document.getElementById(sectionId);
+      if (section) {
+        section.scrollIntoView({ behavior: "smooth" });
+      }
+    }, 400);
   };
 
-  const getMobileLinkClass = (isActive) => {
-    const baseClass = "block font-medium transition-colors";
-    const activeClass = isActive ? "text-amber-400 border-l-4 border-amber-400 pl-3" : "text-white hover:text-amber-400";
-    const disabledClass = disabled ? "opacity-50 cursor-not-allowed pointer-events-none" : "";
-    return `${baseClass} ${activeClass} ${disabledClass}`;
-  };
-
-  const getJoinUsButtonClass = () => {
-    const baseClass = "bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 px-6 py-2 rounded-full font-bold hover:from-amber-500 hover:to-amber-600 transition-all duration-300 transform hover:scale-105 flex items-center space-x-1";
-    const disabledClass = disabled ? "opacity-50 cursor-not-allowed pointer-events-none" : "";
-    return `${baseClass} ${disabledClass}`;
-  };
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <header
@@ -61,105 +93,81 @@ const Navbar = ({ activeSection = 'home', disabled = false }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 lg:h-20">
           {/* Logo */}
-          <div className={`flex items-center space-x-4 ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
-  <img src={logo} alt="VRG Legal Logo" className="h-16 w-auto object-contain" />
-  <h1 className="text-3xl font-bold text-white">
-    VRG Legal <span className="text-amber-400">LLP</span>
-  </h1>
-</div>
-
+          <Link
+            to="/Home"
+            onClick={(e) => handleProtectedNavigation(e)}
+            className="flex items-center space-x-4 cursor-pointer"
+          >
+            <img src={logo} alt="VRG Legal Logo" className="h-16 w-auto" />
+            <h1 className="text-3xl font-bold text-white">
+              VRG Legal <span className="text-amber-400">LLP</span>
+            </h1>
+          </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-8">
+          <nav className="hidden lg:flex items-center space-x-8 text-white">
             <Link
               to="/Home"
-              onClick={handleLinkClick}
-              className={getNavLinkClass(activeSection === 'home')}
+              onClick={(e) => handleProtectedNavigation(e)}
+              className="hover:text-amber-400"
             >
               Home
             </Link>
-             <a
-  href="#about"
-  onClick={(e) => {
-    e.preventDefault();
-    document.getElementById("about")?.scrollIntoView({ behavior: "smooth" });
-  }}
-  className={getNavLinkClass(activeSection === 'about')}
->
-About Us
-</a>
-            
-            <a
-  href="#services"
-  onClick={(e) => {
-    e.preventDefault();
-    document.getElementById("services")?.scrollIntoView({ behavior: "smooth" });
-  }}
-  className={getNavLinkClass(activeSection === 'practice')}
->
-  Services
-</a>
-            <a
-  href="#team"
-  onClick={(e) => {
-    e.preventDefault();
-    document.getElementById("team")?.scrollIntoView({ behavior: "smooth" });
-  }}
-  className={getNavLinkClass(activeSection === 'team')}
->
-  Team
-</a>
-  <a
-  href="#testimonials"
-  onClick={(e) => {
-    e.preventDefault();
-    document.getElementById("testimonials")?.scrollIntoView({ behavior: "smooth" });
-  }}
-  className={getNavLinkClass(activeSection === 'testimonials')}
->
-  Testimonials
-</a>
-            <a
-  href="#contact"
-  onClick={(e) => {
-    e.preventDefault();
-    document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
-  }}
-  className={getNavLinkClass(activeSection === 'contact')}
->
-  Contact Us
-</a>
+
+            <button
+              onClick={(e) => scrollToSection(e, "about")}
+              className="hover:text-amber-400"
+            >
+              About Us
+            </button>
+
+            <button
+              onClick={(e) => scrollToSection(e, "services")}
+              className="hover:text-amber-400"
+            >
+              Services
+            </button>
+
+            <button
+              onClick={(e) => scrollToSection(e, "team")}
+              className="hover:text-amber-400"
+            >
+              Team
+            </button>
+
+            <button
+              onClick={(e) => scrollToSection(e, "contact")}
+              className="hover:text-amber-400"
+            >
+              Contact Us
+            </button>
+
             {/* Join Us Dropdown */}
             <div className="relative">
               <button
-                className={getJoinUsButtonClass()}
-                onClick={() => handleClick(() =>
-  setIsJoinUsDropdownOpen(!isJoinUsDropdownOpen)
-)}
-
-                disabled={disabled}
+                className="bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 px-6 py-2 rounded-full font-bold flex items-center gap-1"
+                onClick={() =>
+                  setIsJoinUsDropdownOpen(!isJoinUsDropdownOpen)
+                }
               >
-                <span>Join Us</span>
-                <ChevronDown className="h-4 w-4" />
+                Join Us <ChevronDown className="h-4 w-4" />
               </button>
-              
-              {/* Dropdown Menu */}
-              {isJoinUsDropdownOpen && !disabled && (
-                <div 
-                  className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
-                  onMouseEnter={() => setIsJoinUsDropdownOpen(true)}
-                  onMouseLeave={() => setIsJoinUsDropdownOpen(false)}
-                >
+
+              {isJoinUsDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg py-2 z-50">
                   <Link
                     to="/JoinUs?type=intern"
-                    className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-amber-50 hover:text-amber-700 transition-colors"
+                    onClick={(e) => handleProtectedNavigation(e)}
+                    className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-amber-50"
                   >
                     <GraduationCap className="h-5 w-5 text-amber-600" />
                     <span>As an Intern</span>
                   </Link>
+
                   <Link
                     to="/JoinUs?type=advocate"
-                    className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-amber-50 hover:text-amber-700 transition-colors"
+                    onClick={(e) => handleProtectedNavigation(e)}
+                    className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-amber-50"
                   >
                     <Briefcase className="h-5 w-5 text-amber-600" />
                     <span>As an Advocate</span>
@@ -169,103 +177,86 @@ About Us
             </div>
           </nav>
 
-          {/* Mobile menu button */}
+          {/* Mobile Menu Toggle */}
           <button
-            className={`lg:hidden text-white p-2 ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-            onClick={() => handleClick(() => setIsMenuOpen(!isMenuOpen))}
-            disabled={disabled}
+            className="lg:hidden text-white p-2"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
-            {isMenuOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
+            {isMenuOpen ? <X /> : <Menu />}
           </button>
         </div>
       </div>
 
       {/* Mobile Menu */}
-      {isMenuOpen && !disabled && (
+      {isMenuOpen && (
         <div className="lg:hidden bg-slate-900 border-t border-slate-700">
           <div className="px-4 py-4 space-y-4">
             <Link
               to="/Home"
-              className={getMobileLinkClass(activeSection === 'home')}
-              onClick={() => setIsMenuOpen(false)}
+              onClick={(e) => {
+                setIsMenuOpen(false);
+                handleProtectedNavigation(e);
+              }}
+              className="block text-white"
             >
               Home
             </Link>
-            <a
-              href="#about"
-              className={getMobileLinkClass(activeSection === 'about')}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              About
-            </a>
-            <a
-  href="#services"
-  onClick={(e) => {
-    e.preventDefault();
-    document.getElementById("services")?.scrollIntoView({ behavior: "smooth" });
-  }}
-  className={getNavLinkClass(activeSection === 'practice')}
->
-  Services
-</a>
 
-            <a
-              href="#attorneys"
-              className={getMobileLinkClass(activeSection === 'attorneys')}
-              onClick={() => setIsMenuOpen(false)}
+            <button
+              onClick={(e) => {
+                scrollToSection(e, "about");
+                setIsMenuOpen(false);
+              }}
+              className="block text-white"
+            >
+              About Us
+            </button>
+
+            <button
+              onClick={(e) => {
+                scrollToSection(e, "services");
+                setIsMenuOpen(false);
+              }}
+              className="block text-white"
+            >
+              Services
+            </button>
+
+            <button
+              onClick={(e) => {
+                scrollToSection(e, "team");
+                setIsMenuOpen(false);
+              }}
+              className="block text-white"
             >
               Team
-            </a>
-            <a
-              href="#contact"
-              className={getMobileLinkClass(activeSection === 'contact')}
-              onClick={() => setIsMenuOpen(false)}
+            </button>
+
+            <button
+              onClick={(e) => {
+                scrollToSection(e, "contact");
+                setIsMenuOpen(false);
+              }}
+              className="block text-white"
             >
-              Contact
-            </a>
-            {/* Mobile Join Us Dropdown */}
-            <div className="w-full">
-              <button
-                className={`w-full bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 px-6 py-3 rounded-full font-bold hover:from-amber-500 hover:to-amber-600 transition-all duration-300 flex items-center justify-center space-x-2 ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-                onClick={() => handleClick(() => setIsJoinUsDropdownOpen(!isJoinUsDropdownOpen))}
-                disabled={disabled}
-              >
-                <span>Join Us</span>
-                <ChevronDown className="h-4 w-4" />
-              </button>
-              
-              {/* Mobile Dropdown Menu */}
-              {isJoinUsDropdownOpen && !disabled && (
-                <div className="mt-2 space-y-2">
-                  <Link
-                    to="/JoinUs?type=intern"
-                    className="flex items-center space-x-3 px-4 py-3 text-white bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors"
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      setIsJoinUsDropdownOpen(false);
-                    }}
-                  >
-                    <GraduationCap className="h-5 w-5 text-amber-400" />
-                    <span>As an Intern</span>
-                  </Link>
-                  <Link
-                    to="/JoinUs?type=advocate"
-                    className="flex items-center space-x-3 px-4 py-3 text-white bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors"
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      setIsJoinUsDropdownOpen(false);
-                    }}
-                  >
-                    <Briefcase className="h-5 w-5 text-amber-600" />
-                    <span>As an Advocate</span>
-                  </Link>
-                </div>
-              )}
-            </div>
+              Contact Us
+            </button>
+
+            <Link
+              to="/JoinUs?type=intern"
+              onClick={(e) => handleProtectedNavigation(e)}
+              className="block text-white bg-slate-800 px-4 py-3 rounded"
+            >
+              As an Intern
+            </Link>
+
+            <Link
+              to="/JoinUs?type=advocate"
+              onClick={(e) => handleProtectedNavigation(e)}
+              className="block text-white bg-slate-800 px-4 py-3 rounded"
+            >
+              As an Advocate
+            </Link>
           </div>
         </div>
       )}
